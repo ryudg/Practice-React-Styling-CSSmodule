@@ -149,3 +149,194 @@ function App() {
 
 export default App;
 ```
+
+> **react-icons**
+>
+> 아이콘들을 컴포넌트 형태로 쉽게 사용하기 [React Icons](https://react-icons.github.io/react-icons) <br><br>**Install**
+>
+> ```bash
+> > npm i react-icons
+> ```
+>
+> **Usage**
+>
+> ```javascript
+>
+> import { IconName } from "react-icons/IconTitle";
+>
+> ...
+>
+>   <IconName/>
+> ```
+
+- Icon 적용
+
+```javascript
+// components/CheckBox.js
+
+import React from "react";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
+
+function CheckBox({ checked, children, ...rest }) {
+  return (
+    <div>
+      <label>
+        <input type="checkbox" checked={checked} {...rest} />
+        <div>{checked ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}</div>
+      </label>
+      <span>{children}</span>
+    </div>
+  );
+}
+
+export default CheckBox;
+```
+
+- CheckBox styling
+  - CheckBox.module.css 파일을 components 디렉터리에 생성
+
+```javascript
+// components/CheckBox.module.css
+.checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox label {
+  cursor: pointer;
+}
+
+/* 실제 input 을 숨기기 위한 코드 */
+.checkbox input {
+  width: 0;
+  height: 0;
+  position: absolute;
+  opacity: 0;
+}
+
+.checkbox span {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  /* 아이콘의 크기는 폰트 사이즈로 조정 가능 */
+  font-size: 2rem;
+  margin-right: 0.25rem;
+  color: #adb5bd;
+}
+
+.checked {
+  color: #339af0;
+}
+```
+
+- CheckBox 컴포넌트에 적용
+  - `<div class="CheckBox_checkbox__Y6fhT">...</div>`와 같은 고유 클래스명 생성됨
+
+```javascript
+// components/CheckBox.js
+import React from "react";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
+import styles from "./CheckBox.module.css";
+
+function CheckBox({ checked, children, ...rest }) {
+  return (
+    <div className={styles.checkbox}>
+      <label>
+        <input type="checkbox" checked={checked} {...rest} />
+        <div className={styles.icon}>
+          {checked ? (
+            <MdCheckBox className={styles.checked} />
+          ) : (
+            <MdCheckBoxOutlineBlank />
+          )}
+        </div>
+      </label>
+      <span>{children}</span>
+    </div>
+  );
+}
+
+export default CheckBox;
+```
+
+## `classnames` 라이브러리의 **_bind_** 활용
+
+- CSS Module 을 사용 할 때에는 `styles.icon` 이런 식으로 객체안에 있는 값을 조회해야함
+  - 만약 클래스 이름에 `-` 가 들어가 있다면 > `styles['my-class']`
+  - 만약에 여러개가 있다면 `${styles.one} ${styles.two}`
+  - 조건부 스타일링 `${styles.one} ${condition ? styles.two : ''}`
+- 위의 예처럼 번거롭기 때문에 번거로움
+  <br>
+
+```javascript
+import React from "react";
+import { MdCheckBox, MdCheckBoxOutlineBlank } from "react-icons/md";
+import styles from "./CheckBox.module.css";
+import classNames from "classnames/bind";
+
+const cx = classNames.bind(styles);
+
+function CheckBox({ checked, children, ...rest }) {
+  return (
+    <div className={cx("checkbox")}>
+      <label>
+        <input type="checkbox" checked={checked} {...rest} />
+        <div className={cx("icon")}>
+          {checked ? (
+            <MdCheckBox className={cx("checked")} />
+          ) : (
+            <MdCheckBoxOutlineBlank />
+          )}
+        </div>
+      </label>
+      <span>{children}</span>
+    </div>
+  );
+}
+
+export default CheckBox;
+```
+
+- classnames 의 bind 기능을 사용하면, CSS 클래시 이름을 지정해 줄 때 `cx('클래스이름')` 과 같은 형식으로 편하게 사용 할 수 있다
+  - 예시
+  ```javascript
+  cx("one", "two");
+  cx("my-component", {
+    condition: true,
+  });
+  cx("my-component", ["another", "classnames"]);
+  ```
+
+# 추가 내용
+
+- CSS Module 은 Sass 에서도 사용 할 수 있다. (`컴포넌트.module.scss`)
+
+  - CSS Module 을 사용하고 있는 파일에서 클래스 이름을 고유화 하지 않고 전역적 클래스이름을 사용하고 싶다면
+
+  ```scss
+  // .module.css
+  :global .my-global-name {
+  }
+  // .module.scss
+  :global {
+    .my-global-name {
+    }
+  }
+  ```
+
+  - CSS Module 을 사용하지 않는 곳에서 특정 클래스에서만 고유 이름을 만들어서 사용하고 싶다면
+
+  ```scss
+  // .module.css
+  :local .make-this-local {
+  }
+  // .module.scss
+  :local {
+    .make-this-local {
+    }
+  }
+  ```
